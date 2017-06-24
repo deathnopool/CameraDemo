@@ -7,7 +7,6 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.io.IOException;
-import java.util.List;
 
 /**
  * Created by Michael on 2017/6/24.
@@ -67,13 +66,16 @@ public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback
         // reformatting changes here
         Camera.Parameters params = mCamera.getParameters();
         params.setPreviewSize(1920, 1080);
-        params.setFocusMode(params.FOCUS_MODE_AUTO);
-        mCamera.setParameters(params);
+        params.setFocusMode(params.FOCUS_MODE_CONTINUOUS_PICTURE);
+
 
         // start preview with new settings
         try {
+            mCamera.setParameters(params);
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();
+
+            mCamera.cancelAutoFocus();
         } catch (IOException e) {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
         }

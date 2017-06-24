@@ -36,6 +36,8 @@ public class CameraActivity extends Activity {
         mPreview = new CameraPreview(this, mCamera);
         LinearLayout preview = (LinearLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
+        preview.setKeepScreenOn(true);
+        preview.setFocusable(true);
 
         // Add a listener to the Capture button
         Button captureButton = (Button) findViewById(R.id.button_capture);
@@ -93,7 +95,7 @@ public class CameraActivity extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        releaseCamera();
+        //releaseCamera();
     }
 
     /** 检查设备是否存在照相机 */
