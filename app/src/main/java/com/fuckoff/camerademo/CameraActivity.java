@@ -1,5 +1,6 @@
 package com.fuckoff.camerademo;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
@@ -7,15 +8,19 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+
+import pub.devrel.easypermissions.EasyPermissions;
 
 public class CameraActivity extends Activity {
 
@@ -28,6 +33,8 @@ public class CameraActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
+
+
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
@@ -52,6 +59,14 @@ public class CameraActivity extends Activity {
         );
 
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        // Forward results to EasyPermissions
+        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private PictureCallback mPicture = new PictureCallback() {
@@ -120,4 +135,6 @@ public class CameraActivity extends Activity {
         }
         return c; // returns null if camera is unavailable
     }
+
+
 }
