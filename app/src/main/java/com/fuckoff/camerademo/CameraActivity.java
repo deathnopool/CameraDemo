@@ -1,19 +1,22 @@
 package com.fuckoff.camerademo;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -22,10 +25,15 @@ import java.io.IOException;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class CameraActivity extends Activity {
+public class CameraActivity extends Activity implements View.OnClickListener{
 
     private Camera mCamera;
     private CameraPreview mPreview;
+    private ImageView imageView;
+    private FrameLayout imageViewContainer;
+    private Button captureButton, saveButton, cancelButton;
+    private byte[] mData;
+
     private String TAG = "CameraActivity";
 
 
@@ -33,8 +41,6 @@ public class CameraActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_camera);
-
-
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
@@ -47,17 +53,15 @@ public class CameraActivity extends Activity {
         preview.setFocusable(true);
 
         // Add a listener to the Capture button
-        Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        mCamera.takePicture(null, null, mPicture);
-                    }
-                }
-        );
+        captureButton = findViewById(R.id.button_capture);
+        imageView = findViewById(R.id.image_preview);
+        imageViewContainer = findViewById(R.id.image_preview_container);
+        saveButton = findViewById(R.id.button_save);
+        cancelButton = findViewById(R.id.button_cancel);
 
+        captureButton.setOnClickListener(this);
+        saveButton.setOnClickListener(this);
+        cancelButton.setOnClickListener(this);
 
     }
 
@@ -73,30 +77,11 @@ public class CameraActivity extends Activity {
 
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
+            mData = data;
 
-            File mediaStorageDir =
-                    new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CameraDemo");
-
-            // Create the storage directory if it does not exist
-            if (! mediaStorageDir.exists()){
-                if (! mediaStorageDir.mkdirs()){
-                    Log.d("MyCameraApp", "failed to create directory");
-                    return;
-                }
-            }
-
-            File pictureFile = new File(mediaStorageDir.getPath()+File.separator+"IMG_"+".jpg");
-            Log.i("img", pictureFile.getAbsolutePath());
-
-            try {
-                FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
-                fos.close();
-            } catch (FileNotFoundException e) {
-                Log.d(TAG, "File not found: " + e.getMessage());
-            } catch (IOException e) {
-                Log.d(TAG, "Error accessing file: " + e.getMessage());
-            }
+            Bitmap picBitmap = BitmapFactory.decodeByteArray(data, 0, data.length);
+            imageView.setImageBitmap(picBitmap);
+            imageViewContainer.setVisibility(View.VISIBLE);
         }
     };
 
@@ -136,5 +121,69 @@ public class CameraActivity extends Activity {
         return c; // returns null if camera is unavailable
     }
 
+    private void savePicture(byte[] data){
+        File mediaStorageDir =
+                    new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "CameraDemo");
 
+            // Create the storage directory if it does not exist
+            if (! mediaStorageDir.exists()){
+                if (! mediaStorageDir.mkdirs()){
+                    Log.d("MyCameraApp", "failed to create directory");
+                    return;
+                }
+            }
+
+            File pictureFile = new File(mediaStorageDir.getPath()+File.separator+"IMG_"+System.currentTimeMillis()+".jpeg");
+            Log.i("img", pictureFile.getAbsolutePath());
+
+            try {
+                FileOutputStream fos = new FileOutputStream(pictureFile);
+                fos.write(data);
+                fos.close();
+            } catch (FileNotFoundException e) {
+                Log.d(TAG, "File not found: " + e.getMessage());
+            } catch (IOException e) {
+                Log.d(TAG, "Error accessing file: " + e.getMessage());
+            }
+    }
+
+
+    @Override
+    public void onClick(View view) {
+        int id = view.getId();
+        switch (id){
+            case R.id.button_capture:
+                mCamera.takePicture(null, null, mPicture);
+                break;
+            case R.id.button_save:
+                if (null != this.mData){
+                    this.savePicture(this.mData);
+                    this.mData = null;
+                    this.imageViewContainer.setVisibility(View.GONE);
+                }
+                Log.i(TAG, "保存图片出错了！");
+                break;
+            case R.id.button_cancel:
+                this.mData = null;
+                this.imageViewContainer.setVisibility(View.GONE);
+                break;
+            default:
+                break;
+        }
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        switch (keyCode){
+            case KeyEvent.KEYCODE_BACK:
+                if (this.imageViewContainer.getVisibility()!=View.GONE) {
+                    this.imageViewContainer.setVisibility(View.GONE);
+                    return true;
+                }
+                break;
+            default:
+                break;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

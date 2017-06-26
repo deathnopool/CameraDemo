@@ -1,23 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <LinearLayout
+        android:id="@+id/camera_preview"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:orientation="horizontal" />
+
+    <Button
+        android:id="@+id/button_capture"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical|end"
+        android:text="Capture" />
     <FrameLayout
+        android:id="@+id/image_preview_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        >
-        <LinearLayout
-            android:id="@+id/camera_preview"
-            android:layout_height="match_parent"
-            android:layout_width="match_parent"
-            android:orientation="horizontal" />
-
-        <Button
-            android:id="@+id/button_capture"
+        android:visibility="gone">
+        <ImageView
+            android:id="@+id/image_preview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|end"
-            android:text="Capture" />
+            />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:gravity="center_horizontal">
+            <Button
+                android:id="@+id/button_save"
+                android:layout_width="100sp"
+                android:layout_height="wrap_content"
+                android:text="save"/>
+            <Button
+                android:id="@+id/button_cancel"
+                android:layout_width="100sp"
+                android:layout_height="wrap_content"
+                android:text="cancel"
+                />
+        </LinearLayout>
+
     </FrameLayout>
-</LinearLayout>
+</FrameLayout>
