@@ -3,8 +3,10 @@ package com.fuckoff.camerademo;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.GradientDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -25,7 +28,9 @@ import java.io.IOException;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-public class CameraActivity extends Activity implements View.OnClickListener{
+import static android.graphics.drawable.GradientDrawable.*;
+
+public class CameraActivity extends Activity implements View.OnClickListener {
 
     private Camera mCamera;
     private CameraPreview mPreview;
@@ -33,9 +38,9 @@ public class CameraActivity extends Activity implements View.OnClickListener{
     private FrameLayout imageViewContainer;
     private Button captureButton, saveButton, cancelButton;
     private byte[] mData;
+    private MyOrientation myOrientation;
 
     private String TAG = "CameraActivity";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,6 +49,11 @@ public class CameraActivity extends Activity implements View.OnClickListener{
 
         // Create an instance of Camera
         mCamera = getCameraInstance();
+
+        Camera.Parameters prams = mCamera.getParameters();
+        prams.setJpegQuality(100);
+        prams.setPictureSize(1920, 1080);
+        mCamera.setParameters(prams);
 
         // Create our Preview view and set it as the content of our activity.
         mPreview = new CameraPreview(this, mCamera);
@@ -63,6 +73,21 @@ public class CameraActivity extends Activity implements View.OnClickListener{
         saveButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
 
+        myOrientation = new MyOrientation(this);
+
+    }
+
+    @Override
+    protected void onResume() {
+        myOrientation.enable();
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        myOrientation.disable();
+        super.onPause();
+        //releaseCamera();
     }
 
     @Override
@@ -92,11 +117,6 @@ public class CameraActivity extends Activity implements View.OnClickListener{
         }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        //releaseCamera();
-    }
 
     /** 检查设备是否存在照相机 */
     public static boolean checkCameraHardware(Context context) {
@@ -186,4 +206,30 @@ public class CameraActivity extends Activity implements View.OnClickListener{
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    public class MyOrientation extends OrientationEventListener {
+        public MyOrientation(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int i) {
+            Log.i("orientation", i+"");
+
+            // 设置照骗的rotation，保持与人眼一致。可能会有bug。
+            Camera.Parameters prams = mCamera.getParameters();
+            prams.setRotation(0);
+            if (i>315 || i<=45){
+                prams.setRotation(90);
+            } else if (i>=45 && i<=135){
+
+            } else if (i>135 && i<=225){
+                prams.setRotation(90);
+            } else {
+
+            }
+            mCamera.setParameters(prams);
+        }
+    }
+
 }
