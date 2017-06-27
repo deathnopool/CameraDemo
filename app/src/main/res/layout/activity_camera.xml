@@ -1,19 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
     <LinearLayout
         android:id="@+id/camera_preview"
         android:layout_height="match_parent"
         android:layout_width="match_parent"
         android:orientation="horizontal" />
 
-    <Button
-        android:id="@+id/button_capture"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical|end"
-        android:text="Capture" />
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:gravity="center"
+        android:background="@color/camera_gray"
+        android:alpha="0.4">
+
+        <ImageView
+            android:id="@+id/image_capture"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:src="@drawable/ic_camera_black_24dp" />
+
+    </LinearLayout>
+
+
     <FrameLayout
         android:id="@+id/image_preview_container"
         android:layout_width="match_parent"
@@ -46,4 +59,4 @@
         </LinearLayout>
 
     </FrameLayout>
-</FrameLayout>
+</merge>

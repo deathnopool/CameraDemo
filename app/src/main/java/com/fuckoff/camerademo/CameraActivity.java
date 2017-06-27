@@ -2,16 +2,16 @@ package com.fuckoff.camerademo;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.GradientDrawable;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.RequiresPermission;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.OrientationEventListener;
@@ -28,15 +28,14 @@ import java.io.IOException;
 
 import pub.devrel.easypermissions.EasyPermissions;
 
-import static android.graphics.drawable.GradientDrawable.*;
-
 public class CameraActivity extends Activity implements View.OnClickListener {
 
     private Camera mCamera;
     private CameraPreview mPreview;
     private ImageView imageView;
     private FrameLayout imageViewContainer;
-    private Button captureButton, saveButton, cancelButton;
+    private Button saveButton, cancelButton;
+    private ImageView captureImg;
     private byte[] mData;
     private MyOrientation myOrientation;
 
@@ -63,13 +62,13 @@ public class CameraActivity extends Activity implements View.OnClickListener {
         preview.setFocusable(true);
 
         // Add a listener to the Capture button
-        captureButton = findViewById(R.id.button_capture);
+        captureImg = findViewById(R.id.image_capture);
         imageView = findViewById(R.id.image_preview);
         imageViewContainer = findViewById(R.id.image_preview_container);
         saveButton = findViewById(R.id.button_save);
         cancelButton = findViewById(R.id.button_cancel);
 
-        captureButton.setOnClickListener(this);
+        captureImg.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         cancelButton.setOnClickListener(this);
 
@@ -88,6 +87,11 @@ public class CameraActivity extends Activity implements View.OnClickListener {
         myOrientation.disable();
         super.onPause();
         //releaseCamera();
+    }
+
+    @Override
+    public void startActivityForResult(@RequiresPermission Intent intent, int requestCode) {
+        super.startActivityForResult(intent, requestCode);
     }
 
     @Override
@@ -167,12 +171,11 @@ public class CameraActivity extends Activity implements View.OnClickListener {
             }
     }
 
-
     @Override
     public void onClick(View view) {
         int id = view.getId();
         switch (id){
-            case R.id.button_capture:
+            case R.id.image_capture:
                 mCamera.takePicture(null, null, mPicture);
                 break;
             case R.id.button_save:
@@ -180,6 +183,7 @@ public class CameraActivity extends Activity implements View.OnClickListener {
                     this.savePicture(this.mData);
                     this.mData = null;
                     this.imageViewContainer.setVisibility(View.GONE);
+                    return;
                 }
                 Log.i(TAG, "保存图片出错了！");
                 break;
@@ -216,6 +220,10 @@ public class CameraActivity extends Activity implements View.OnClickListener {
         public void onOrientationChanged(int i) {
             Log.i("orientation", i+"");
 
+            if (mCamera == null){
+                Log.i(TAG, "mCamera == null");
+                return;
+            }
             // 设置照骗的rotation，保持与人眼一致。可能会有bug。
             Camera.Parameters prams = mCamera.getParameters();
             prams.setRotation(0);
